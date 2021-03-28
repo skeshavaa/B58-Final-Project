@@ -93,7 +93,19 @@ draw_obstacles:
 	j loop
 
 move_obstacles:
-	li $v0 4
-	la $a0 special
+	la $t4, c1
+	lw $t5, 0($t4)
+
+	li $v0 1
+	move $a0 $t5
 	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
+	
+	addi $t5, $t5, -4
+	sw $t5, 0($t4)
+	sw $t0, ($t5)
+	sw $t3, 0($t0)
+	
 	j loop
