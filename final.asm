@@ -21,17 +21,12 @@
 	li $t1, 0xff0000 # $t1 stores the red colour 
 	li $t2, 0x808080 # $t2 stores the green colour code 
 	li $t3, 0x0000ff # $t3 stores the blue colour code
+	li $t5, 0x000000
 	li $v0, 10 # terminate the program gracefully
 	
 
 	
 main:
-	#li $t9, 0xffff0000 
-	#lw $t8, 0($t9)
-	#beq $t8, 1, keypress_happened
-	
-	#lw $t2, 4($t9) # this assumes $t9 is set to 0xfff0000from before
-	#beq $t2, 0x61, respond_to_a # ASCII code of 'a' is 0x61 or 97 in decimal
 	li $t0, 0x10008000 # $t0 stores the base address for display
 	la $t4, c1
 	
@@ -48,9 +43,9 @@ loop2:
 	j draw_ship
 loop3:
 	li $v0, 32
-	li $a0, 500 #Sleep for 500 seconds
+	li $a0, 250 #Sleep for 500 seconds
 	syscall
-	
+	j refresh
 	j main
 	li $v0, 10
 	syscall
@@ -172,5 +167,15 @@ draw_ship:
 	sw $t2, 1288($t0)
 	
 	j loop3
-	
+
+refresh:
+	li $t5, 0x000000
+	li $t0, 0x10008000
+	addi $t8, $zero, 0
+loop_refresh:
+	sw $t5, 0($t0)
+	addi $t0, $t0, 4
+	addi $t8, $t8, 1
+	beq $t8, 2048, main
+	j loop_refresh
 	
