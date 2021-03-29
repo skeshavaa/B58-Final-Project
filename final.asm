@@ -9,6 +9,7 @@
 
 .data
 	c1:    .word    1, 0, 69
+	ship: .word  260
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
 	offset: .byte 4
@@ -22,23 +23,6 @@
 	li $t3, 0x0000ff # $t3 stores the blue colour code
 	li $v0, 10 # terminate the program gracefully
 	
-	
-	sw $t2, 260($t0)
-	sw $t2, 264($t0)
-	
-	sw $t2, 520($t0)
-	sw $t2, 524($t0)
-	
-	sw $t1, 776($t0)
-	sw $t1, 780($t0)
-	sw $t2, 784($t0)
-	sw $t1, 788($t0)
-	
-	sw $t2, 1032($t0)
-	sw $t2, 1036($t0)
-	
-	sw $t2, 1284($t0)
-	sw $t2, 1288($t0)
 
 	
 main:
@@ -56,6 +40,13 @@ main:
 	j move_obstacles
 	
 loop:	
+	li $t9, 0xffff0000 
+	lw $t9, 0($t9)
+	beq $t9, 1, keypress_happened
+	
+loop2:
+	j draw_ship
+loop3:
 	li $v0, 32
 	li $a0, 500 #Sleep for 500 seconds
 	syscall
@@ -96,12 +87,10 @@ move_obstacles:
 	la $t4, c1
 	lw $t5, 0($t4)
 
-	li $v0 1
-	move $a0 $t5
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
+	#li $v0 1
+	#move $a0 $t5
+	#syscall
+	
 	
 	addi $t5, $t5, -4
 	sw $t5, 0($t4)
@@ -109,3 +98,50 @@ move_obstacles:
 	sw $t3, 0($t0)
 	
 	j loop
+
+keypress_happened:
+	li $t9, 0xffff0000 
+	lw $t9, 4($t9) # this assumes $t9 is set to 0xfff0000from before
+	beq $t9, 0x61, respond_to_a
+	
+respond_to_a:
+	la $t4, ship
+	lw $t4, 0($t4)
+	addi $t4, $t4, -4
+	la $t8, ship
+	sw $t4, 0($t8)
+	j loop2
+	
+draw_ship:
+	li $t0, 0x10008000
+	la $t4, ship
+	lw $t4, 0($t4)
+	
+	li $v0 1
+	move $a0 $t4
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
+	
+	add $t0, $t0, $t4
+	sw $t2, 0($t0)
+	sw $t2, 4($t0)
+	addi $t0, $t0, -260
+	
+	sw $t2, 520($t0)
+	sw $t2, 524($t0)
+	
+	sw $t1, 776($t0)
+	sw $t1, 780($t0)
+	sw $t2, 784($t0)
+	sw $t1, 788($t0)
+	
+	sw $t2, 1032($t0)
+	sw $t2, 1036($t0)
+	
+	sw $t2, 1284($t0)
+	sw $t2, 1288($t0)
+	
+	j loop3
+	
