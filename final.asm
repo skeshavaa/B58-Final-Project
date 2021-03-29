@@ -103,11 +103,39 @@ keypress_happened:
 	li $t9, 0xffff0000 
 	lw $t9, 4($t9) # this assumes $t9 is set to 0xfff0000from before
 	beq $t9, 0x61, respond_to_a
+	beq $t9, 0x77, respond_to_w
+	beq $t9, 0x73, respond_to_s
+	beq $t9, 0x64, respond_to_d
+	j loop2
 	
 respond_to_a:
 	la $t4, ship
 	lw $t4, 0($t4)
 	addi $t4, $t4, -4
+	la $t8, ship
+	sw $t4, 0($t8)
+	j loop2
+	
+respond_to_d:
+	la $t4, ship
+	lw $t4, 0($t4)
+	addi $t4, $t4, 4
+	la $t8, ship
+	sw $t4, 0($t8)
+	j loop2
+	
+respond_to_w:
+	la $t4, ship
+	lw $t4, 0($t4)
+	addi $t4, $t4, -256
+	la $t8, ship
+	sw $t4, 0($t8)
+	j loop2
+
+respond_to_s:
+	la $t4, ship
+	lw $t4, 0($t4)
+	addi $t4, $t4, 256
 	la $t8, ship
 	sw $t4, 0($t8)
 	j loop2
@@ -144,4 +172,5 @@ draw_ship:
 	sw $t2, 1288($t0)
 	
 	j loop3
+	
 	
