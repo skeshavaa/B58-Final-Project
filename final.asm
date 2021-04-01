@@ -51,12 +51,13 @@ loop3:
 	syscall
 
 draw_obstacles:
-	li $a1, 31  #Here you set $a1 to the max bound.
+	li $a1, 28  #Here you set $a1 to the max bound.
     	li $v0, 42  #generates the random number.
     	la $t4, c1
     	syscall
+  
     	
-    	
+    	addi $a0, $a0, 2
 	
 	move $t5, $a0	
 	
@@ -66,12 +67,6 @@ draw_obstacles:
     	sw $t3, 0($t0)
     	sw $t0, 0($t4)
     	
-    	li $v0, 1
-    	move $a0, $t0
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
 	
     	addi $t3, $zero, 1
     	sw $t3, 4($t4)
@@ -79,20 +74,29 @@ draw_obstacles:
 	j loop
 
 move_obstacles:
+	li $t3, 0x0000ff # $t3 stores the blue colour code
 	la $t4, c1
 	lw $t5, 0($t4)
 
-	#li $v0 1
-	#move $a0 $t5
-	#syscall
-	
+	li $v0 1
+	move $a0 $t5
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
 	
 	addi $t5, $t5, -4
 	sw $t5, 0($t4)
-	sw $t0, ($t5)
-	sw $t3, 0($t0)
 	
-	j loop
+	la $t4, 0($t4)
+	add $t0, $zero, $t5
+	
+	sw $t3, -4($t0)
+	sw $t3, 0($t0)
+	sw $t3, 256($t0)
+	sw $t3, -256($t0)
+	
+	j loop2
 
 keypress_happened:
 	li $t9, 0xffff0000 
@@ -140,12 +144,7 @@ draw_ship:
 	la $t4, ship
 	lw $t4, 0($t4)
 	
-	li $v0 1
-	move $a0 $t4
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
+	
 	
 	add $t0, $t0, $t4
 	sw $t2, 0($t0)
