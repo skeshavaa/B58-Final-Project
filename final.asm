@@ -36,9 +36,6 @@ drawing:
 	li $t0, 0x10008000
 	la $t4, c1
 	lw $t4, 4($t4)
-	li $v0 1
-	move $a0 $t4
-	syscall
 	beq $t4, $zero, draw_obstacles
 	j move_obstacles
 	
@@ -50,6 +47,7 @@ loop:
 loop2:
 	j draw_ship
 loop3:
+	jal collision_detection
 	li $v0, 32
 	li $a0, 125 #Sleep for 500 seconds
 	syscall
@@ -72,9 +70,6 @@ exit_location_check:
 	la $t4, c1
 	addi $t6, $zero, 0
 	sw $zero, 4($t4)
-	li $v0 4
-	la $a0 special
-	syscall
 	j drawing
 
 draw_obstacles:
@@ -123,7 +118,7 @@ move_obstacles:
 	sw $t3, 256($t0)
 	sw $t3, -256($t0)
 	
-	j loop2
+	j loop
 
 keypress_happened:
 	li $t9, 0xffff0000 
@@ -205,3 +200,42 @@ loop_refresh:
 	beq $t8, 2048, main
 	j loop_refresh
 	
+collision_detection:
+	li $t0, 0x10008000
+	la $t4, ship
+	lw $t4, 0($t4)
+	
+	add $t0, $t0, $t4
+	
+	
+	la $t4, 8($t0)
+	lw $t4, 0($t4)
+	
+	li $v0 1
+	move $a0, $t4
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
+	
+
+	beq $t4, 255, detected
+	
+	sw $t1, 268($t0)
+	sw $t1, 532($t0)
+	sw $t1, 780($t0)
+	sw $t1, 1032($t0)
+	
+	addi $t0, $t0, -260
+	
+	jr $ra
+
+detected:
+	li $v0 4
+	la $a0 special
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
+	
+	jr $ra
