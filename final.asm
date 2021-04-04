@@ -13,7 +13,7 @@
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
 	offset: .byte 4
-
+	
 .text
 	la $t4, c1
 
@@ -28,9 +28,17 @@
 	
 main:
 	li $t0, 0x10008000 # $t0 stores the base address for display
-	la $t4, c1
 	
+	
+	
+	j check_location
+drawing:
+	li $t0, 0x10008000
+	la $t4, c1
 	lw $t4, 4($t4)
+	li $v0 1
+	move $a0 $t4
+	syscall
 	beq $t4, $zero, draw_obstacles
 	j move_obstacles
 	
@@ -43,12 +51,31 @@ loop2:
 	j draw_ship
 loop3:
 	li $v0, 32
-	li $a0, 250 #Sleep for 500 seconds
+	li $a0, 125 #Sleep for 500 seconds
 	syscall
 	j refresh
 	j main
 	li $v0, 10
 	syscall
+
+check_location:
+	la $t4, c1
+	lw $t4, 0($t4)
+	li $t0, 0x10008000
+check_loop:
+	beq $t4, $t0, exit_location_check
+	bgt $t0, 268476416, drawing
+	addi $t0, $t0, 256
+	j check_loop
+	
+exit_location_check:
+	la $t4, c1
+	addi $t6, $zero, 0
+	sw $zero, 4($t4)
+	li $v0 4
+	la $a0 special
+	syscall
+	j drawing
 
 draw_obstacles:
 	li $a1, 28  #Here you set $a1 to the max bound.
@@ -78,12 +105,12 @@ move_obstacles:
 	la $t4, c1
 	lw $t5, 0($t4)
 
-	li $v0 1
-	move $a0 $t5
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
+#	li $v0 1
+#	move $a0 $t5
+#	syscall
+#	li $v0 4
+#	la $a0 newline
+#	syscall
 	
 	addi $t5, $t5, -4
 	sw $t5, 0($t4)
