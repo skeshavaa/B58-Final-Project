@@ -128,10 +128,19 @@ keypress_happened:
 	beq $t9, 0x73, respond_to_s
 	beq $t9, 0x64, respond_to_d
 	j loop2
-	
+
+#Checking a valid movement
 respond_to_a:
 	la $t4, ship
 	lw $t4, 0($t4)
+	addi $t5, $zero, 0
+	
+loop_a: 
+	beq $t5, $t4, loop2
+	bgt $t5, 8192, end_a_check
+	add $t5, $t5, 256
+	j loop_a
+end_a_check:
 	addi $t4, $t4, -4
 	la $t8, ship
 	sw $t4, 0($t8)
@@ -140,6 +149,15 @@ respond_to_a:
 respond_to_d:
 	la $t4, ship
 	lw $t4, 0($t4)
+	addi $t5, $zero, 252
+	addi $t4, $t4, 16
+loop_d: 
+	beq $t5, $t4, loop2
+	bgt $t5, 8444, end_d_check
+	add $t5, $t5, 256
+	j loop_d
+end_d_check:
+	addi $t4, $t4, -16
 	addi $t4, $t4, 4
 	la $t8, ship
 	sw $t4, 0($t8)
@@ -148,14 +166,37 @@ respond_to_d:
 respond_to_w:
 	la $t4, ship
 	lw $t4, 0($t4)
+	addi $t5, $zero, 0
+loop_w: 
+	beq $t5, $t4, loop2
+	bgt $t5, 248, end_w_check
+	add $t5, $t5, 4
+	j loop_w
+end_w_check:
+	li $v0 1
+	move $a0 $t4
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
 	addi $t4, $t4, -256
 	la $t8, ship
 	sw $t4, 0($t8)
 	j loop2
-
+	
+#Checking S movement is valid
 respond_to_s:
 	la $t4, ship
 	lw $t4, 0($t4)
+	addi $t5, $zero, 8192
+	addi $t4, $t4, 1280
+loop_s: 
+	beq $t5, $t4, loop2
+	bgt $t5, 8448, end_s_check
+	add $t5, $t5, 4
+	j loop_s
+end_s_check:
+	addi $t4, $t4, -1280
 	addi $t4, $t4, 256
 	la $t8, ship
 	sw $t4, 0($t8)
@@ -210,21 +251,28 @@ collision_detection:
 	
 	la $t4, 8($t0)
 	lw $t4, 0($t4)
-	
-	li $v0 1
-	move $a0, $t4
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
-	
 
 	beq $t4, 255, detected
 	
-	sw $t1, 268($t0)
-	sw $t1, 532($t0)
-	sw $t1, 780($t0)
-	sw $t1, 1032($t0)
+	la $t4, 268($t0)
+	lw $t4, 0($t4)
+	
+	beq $t4, 255, detected
+	
+	la $t4, 532($t0)
+	lw $t4, 0($t4)
+	
+	beq $t4, 255, detected
+	
+	la $t4, 780($t0)
+	lw $t4, 0($t4)
+	
+	beq $t4, 255, detected
+	
+	la $t4, 1032($t0)
+	lw $t4, 0($t4)
+	
+	beq $t4, 255, detected
 	
 	addi $t0, $t0, -260
 	
