@@ -9,6 +9,8 @@
 
 .data
 	c1:    .word    1, 0, 69
+	c2:    .word    1, 0, 69
+	c3:    .word    1, 0, 69
 	ship: .word  260, 0
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
@@ -33,10 +35,33 @@ main:
 	
 	#j check_location
 	li $t0, 0x10008000
+	
+	addi $t6, $zero, 0
+obstacle_loop:
+	add $t6, $t6, 1
+	
+	beq $t6, 1, obstacle1
+	beq $t6, 2, obstacle2
+	beq $t6, 3, obstacle3
+	beq $t6, 4, loop
+obstacle1:
 	la $t4, c1
-	lw $t4, 4($t4)
-	beq $t4, $zero, draw_obstacles
+	jal check_location
+	j obstacle_check
+obstacle2:
+	la $t4, c2
+	jal check_location
+	j obstacle_check
+obstacle3:
+	la $t4, c3
+	jal check_location
+	j obstacle_check
+	
+obstacle_check:
+	lw $t5, 4($t4)
+	beq $t5, $zero, draw_obstacles
 	jal move_obstacles
+	j obstacle_loop
 	
 loop:	
 	li $t9, 0xffff0000 
@@ -53,32 +78,37 @@ loop2:
 	li $v0, 10
 	syscall
 
-#check_location:
-#	la $t4, c1
-#	lw $t4, 0($t4)
-#	li $t0, 0x10008000
-#check_loop:
-#	beq $t4, $t0, exit_location_check
-#	bgt $t0, 268476416, drawing
-#	addi $t0, $t0, 256
-#	j check_loop
-	
-#exit_location_check:
-#	la $t4, c1
-#	addi $t6, $zero, 0
-#	sw $zero, 4($t4)
-#	j drawing
+check_location:
+	lw $t5, 0($t4)
+	li $t0, 0x10008000
+check_loop:
+	beq $t5, $t0, exit_location_check
+	bgt $t0, 268476416, obstacle_check
+	addi $t0, $t0, 256
+	j check_loop
+exit_location_check:
+	addi $t6, $zero, 0
+	sw $zero, 4($t4)
+	jr $ra
 
 draw_obstacles:
+	li $t0, 0x10008000 # $t0 stores the base address for display
 	li $a1, 28  #Here you set $a1 to the max bound.
     	li $v0, 42  #generates the random number.
-    	la $t4, c1
     	syscall
   
-    	
-    	addi $a0, $a0, 2
+  	li $v0 1
+	syscall
+	
+	addi $a0, $a0, 2
 	
 	move $t5, $a0	
+	
+	li $v0 4
+	la $a0 newline
+	syscall
+    	
+    	
 	
 	mul $t5, $t5, 256
 	addi $t5, $t5, 252
@@ -94,7 +124,6 @@ draw_obstacles:
 
 move_obstacles:
 	li $t3, 0x0000ff # $t3 stores the blue colour code
-	la $t4, c1
 	lw $t5, 0($t4)
 
 #	li $v0 1
