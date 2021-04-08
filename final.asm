@@ -31,19 +31,17 @@ main:
 	
 	
 	
-	j check_location
-drawing:
+	#j check_location
 	li $t0, 0x10008000
 	la $t4, c1
 	lw $t4, 4($t4)
 	beq $t4, $zero, draw_obstacles
-	j move_obstacles
+	jal move_obstacles
 	
 loop:	
 	li $t9, 0xffff0000 
 	lw $t9, 0($t9)
 	beq $t9, 1, keypress_happened
-	
 loop2:
 	jal draw_ship
 	jal collision_detection
@@ -55,21 +53,21 @@ loop2:
 	li $v0, 10
 	syscall
 
-check_location:
-	la $t4, c1
-	lw $t4, 0($t4)
-	li $t0, 0x10008000
-check_loop:
-	beq $t4, $t0, exit_location_check
-	bgt $t0, 268476416, drawing
-	addi $t0, $t0, 256
-	j check_loop
+#check_location:
+#	la $t4, c1
+#	lw $t4, 0($t4)
+#	li $t0, 0x10008000
+#check_loop:
+#	beq $t4, $t0, exit_location_check
+#	bgt $t0, 268476416, drawing
+#	addi $t0, $t0, 256
+#	j check_loop
 	
-exit_location_check:
-	la $t4, c1
-	addi $t6, $zero, 0
-	sw $zero, 4($t4)
-	j drawing
+#exit_location_check:
+#	la $t4, c1
+#	addi $t6, $zero, 0
+#	sw $zero, 4($t4)
+#	j drawing
 
 draw_obstacles:
 	li $a1, 28  #Here you set $a1 to the max bound.
@@ -117,7 +115,7 @@ move_obstacles:
 	sw $t3, 256($t0)
 	sw $t3, -256($t0)
 	
-	j loop
+	jr $ra
 
 keypress_happened:
 	li $t9, 0xffff0000 
