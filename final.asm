@@ -1,17 +1,45 @@
-# Bitmap display starter code## Bitmap Display Configuration:
-# -Unit width in pixels: 8
-# -Unit height in pixels: 8
-# -Display width in pixels: 256
-# -Display height in pixels: 256
-# -Base Address for Display: 0x10008000 ($gp)
+#####################################################################
 #
-.eqv BASE_ADDRESS0x10008000
+# CSCB58 Winter 2021 Assembly Final Project
+# University of Toronto, Scarborough
+#
+# Student: Keshavaa Shaiskandan, 1006243940, shaiskan
+#
+# Bitmap Display Configuration:
+# - Unit width in pixels: 8 (update this as needed)
+# - Unit height in pixels: 8 (update this as needed)
+# - Display width in pixels: 512 (update this as needed)
+# - Display height in pixels: 256 (update this as needed)
+# - Base Address for Display: 0x10008000 ($gp)
+#
+# Which milestones have been reached in this submission?
+# (See the assignment handout for descriptions of the milestones)
+# - Milestones 1 and 2, partially 3
+#
+# Which approved features have been implemented for milestone 4?
+# (See the assignment handout for the list of additional features)
+# 1. (fill in the feature, if any)
+# 2. (fill in the feature, if any)
+# 3. (fill in the feature, if any)
+# ... (add more if necessary)
+#
+# Link to video demonstration for final submission:
+# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+#
+# Are you OK with us sharing the video with people outside course staff?
+# - Yes
+#
+# Any additional information that the TA needs to know:
+# - (write here, if any)
+#
+#####################################################################
 
+.eqv BASE_ADDRESS0x10008000
 .data
 	c1:    .word    1, 0, 69
 	c2:    .word    1, 0, 69
 	c3:    .word    1, 0, 69
-	ship: .word  260, 0
+	ship: .word  260, 0, 0, 100
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
 	offset: .byte 4
@@ -30,16 +58,9 @@
 	
 main:
 	li $t0, 0x10008000 # $t0 stores the base address for display
-	
-	
-	
-	#j check_location
-	li $t0, 0x10008000
-	
 	addi $t6, $zero, 0
 obstacle_loop:
 	add $t6, $t6, 1
-	
 	beq $t6, 1, obstacle1
 	beq $t6, 2, obstacle2
 	beq $t6, 3, obstacle3
@@ -67,14 +88,13 @@ loop:
 	li $t9, 0xffff0000 
 	lw $t9, 0($t9)
 	beq $t9, 1, keypress_happened
-loop2:
+drawing:
 	jal draw_ship
 	jal collision_detection
 	li $v0, 32
 	li $a0, 125 #Sleep for 500 seconds
 	syscall
 	j refresh
-	j main
 	li $v0, 10
 	syscall
 
@@ -96,19 +116,9 @@ draw_obstacles:
 	li $a1, 28  #Here you set $a1 to the max bound.
     	li $v0, 42  #generates the random number.
     	syscall
-  
-  	li $v0 1
-	syscall
 	
 	addi $a0, $a0, 2
-	
 	move $t5, $a0	
-	
-	li $v0 4
-	la $a0 newline
-	syscall
-    	
-    	
 	
 	mul $t5, $t5, 256
 	addi $t5, $t5, 252
@@ -153,7 +163,7 @@ keypress_happened:
 	beq $t9, 0x77, respond_to_w
 	beq $t9, 0x73, respond_to_s
 	beq $t9, 0x64, respond_to_d
-	j loop2
+	j drawing
 
 #Checking a valid movement
 respond_to_a:
@@ -162,7 +172,7 @@ respond_to_a:
 	addi $t5, $zero, 0
 	
 loop_a: 
-	beq $t5, $t4, loop2
+	beq $t5, $t4, drawing
 	bgt $t5, 8192, end_a_check
 	add $t5, $t5, 256
 	j loop_a
@@ -170,7 +180,7 @@ end_a_check:
 	addi $t4, $t4, -4
 	la $t8, ship
 	sw $t4, 0($t8)
-	j loop2
+	j drawing
 	
 respond_to_d:
 	la $t4, ship
@@ -178,7 +188,7 @@ respond_to_d:
 	addi $t5, $zero, 252
 	addi $t4, $t4, 16
 loop_d: 
-	beq $t5, $t4, loop2
+	beq $t5, $t4, drawing
 	bgt $t5, 8444, end_d_check
 	add $t5, $t5, 256
 	j loop_d
@@ -187,28 +197,22 @@ end_d_check:
 	addi $t4, $t4, 4
 	la $t8, ship
 	sw $t4, 0($t8)
-	j loop2
+	j drawing
 	
 respond_to_w:
 	la $t4, ship
 	lw $t4, 0($t4)
 	addi $t5, $zero, 0
 loop_w: 
-	beq $t5, $t4, loop2
+	beq $t5, $t4, drawing
 	bgt $t5, 248, end_w_check
 	add $t5, $t5, 4
 	j loop_w
 end_w_check:
-	li $v0 1
-	move $a0 $t4
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
 	addi $t4, $t4, -256
 	la $t8, ship
 	sw $t4, 0($t8)
-	j loop2
+	j drawing
 	
 #Checking S movement is valid
 respond_to_s:
@@ -217,7 +221,7 @@ respond_to_s:
 	addi $t5, $zero, 8192
 	addi $t4, $t4, 1280
 loop_s: 
-	beq $t5, $t4, loop2
+	beq $t5, $t4, drawing
 	bgt $t5, 8448, end_s_check
 	add $t5, $t5, 4
 	j loop_s
@@ -226,7 +230,7 @@ end_s_check:
 	addi $t4, $t4, 256
 	la $t8, ship
 	sw $t4, 0($t8)
-	j loop2
+	j drawing
 	
 draw_ship:
 	li $t0, 0x10008000
@@ -333,5 +337,20 @@ detected:
 	la $t4, ship
 	addi $t5, $zero, 1
 	sw $t5, 4($t4)
+	
+	lw $t5, 8($t4)
+	addi $t5, $t5, 1
+	sw $t5, 8($t4)
+	
+	lw $t5, 12($t4)
+	addi $t5, $t5, -10
+	sw $t5, 12($t4)
+	
+	li $v0 1
+	move $a0 $t5
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
 	
 	jr $ra
