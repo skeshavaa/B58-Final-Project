@@ -9,7 +9,7 @@
 
 .data
 	c1:    .word    1, 0, 69
-	ship: .word  260
+	ship: .word  260, 0
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
 	offset: .byte 4
@@ -45,8 +45,7 @@ loop:
 	beq $t9, 1, keypress_happened
 	
 loop2:
-	j draw_ship
-loop3:
+	jal draw_ship
 	jal collision_detection
 	li $v0, 32
 	li $a0, 125 #Sleep for 500 seconds
@@ -205,10 +204,11 @@ end_s_check:
 draw_ship:
 	li $t0, 0x10008000
 	la $t4, ship
+	lw $t5, 4($t4)
 	lw $t4, 0($t4)
+	beq $t5, 1, damaged
 	
-	
-	
+healthy:
 	add $t0, $t0, $t4
 	sw $t2, 0($t0)
 	sw $t2, 4($t0)
@@ -227,8 +227,32 @@ draw_ship:
 	
 	sw $t2, 1284($t0)
 	sw $t2, 1288($t0)
+	j finish_drawing
+damaged:
+	add $t0, $t0, $t4
+	sw $t1, 0($t0)
+	sw $t1, 4($t0)
+	addi $t0, $t0, -260
 	
-	j loop3
+	sw $t1, 520($t0)
+	sw $t1, 524($t0)
+	
+	sw $t1, 776($t0)
+	sw $t1, 780($t0)
+	sw $t1, 784($t0)
+	sw $t1, 788($t0)
+	
+	sw $t1, 1032($t0)
+	sw $t1, 1036($t0)
+	
+	sw $t1, 1284($t0)
+	sw $t1, 1288($t0)
+	
+	la $t4, ship
+	addi $t5, $zero, 0
+	sw $t5, 4($t4)
+finish_drawing:
+	jr $ra
 
 refresh:
 	li $t5, 0x000000
@@ -279,11 +303,8 @@ collision_detection:
 	jr $ra
 
 detected:
-	li $v0 4
-	la $a0 special
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
+	la $t4, ship
+	addi $t5, $zero, 1
+	sw $t5, 4($t4)
 	
 	jr $ra
