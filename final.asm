@@ -42,7 +42,6 @@
 	ship: .word  260, 0, 0, 100
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
-	offset: .byte 4
 	
 .text
 	la $t4, c1
@@ -64,7 +63,7 @@ obstacle_loop:
 	beq $t6, 1, obstacle1
 	beq $t6, 2, obstacle2
 	beq $t6, 3, obstacle3
-	beq $t6, 4, loop
+	beq $t6, 4, check_key
 obstacle1:
 	la $t4, c1
 	jal check_location
@@ -84,19 +83,36 @@ obstacle_check:
 	jal move_obstacles
 	j obstacle_loop
 	
-loop:	
+check_key:	
 	li $t9, 0xffff0000 
 	lw $t9, 0($t9)
 	beq $t9, 1, keypress_happened
 drawing:
 	jal draw_ship
 	jal collision_detection
+	jal draw_health
 	li $v0, 32
-	li $a0, 125 #Sleep for 500 seconds
+	li $a0, 125
 	syscall
-	j refresh
+	jal refresh
+	j main
+game_over:
+	jal refresh
+play_again:
+	li $t9, 0xffff0000 
+	lw $t9, 0($t9)
+	beq $t9, 1, keypress_happened
+	li $v0, 32
+	li $a0, 125
+	syscall
+	j play_again
 	li $v0, 10
 	syscall
+	
+
+	
+
+	
 
 check_location:
 	lw $t5, 0($t4)
@@ -130,7 +146,7 @@ draw_obstacles:
     	addi $t3, $zero, 1
     	sw $t3, 4($t4)
     	
-	j loop
+	j check_key
 
 move_obstacles:
 	li $t3, 0x0000ff # $t3 stores the blue colour code
@@ -163,6 +179,7 @@ keypress_happened:
 	beq $t9, 0x77, respond_to_w
 	beq $t9, 0x73, respond_to_s
 	beq $t9, 0x64, respond_to_d
+	beq $t9, 0x70, respond_to_p
 	j drawing
 
 #Checking a valid movement
@@ -231,6 +248,31 @@ end_s_check:
 	la $t8, ship
 	sw $t4, 0($t8)
 	j drawing
+
+respond_to_p:
+	la $t4, ship
+	addi $t5, $zero, 260
+	sw $t5, 0($t4)
+	addi $t5, $zero, 0
+	sw $t5, 4($t4)
+	sw $t5, 8($t4)
+	addi $t5, $zero, 100
+	sw $t5, 12($t4)
+	
+	la $t4, c1
+	jal clean_obstacles
+	la $t4, c2
+	jal clean_obstacles
+	la $t4, c3
+	jal clean_obstacles
+	
+	j main
+	
+clean_obstacles:
+	addi $t5, $zero, 1
+	sw $t5, 0($t4)
+	sw $zero, 4($t4)
+	jr $ra
 	
 draw_ship:
 	li $t0, 0x10008000
@@ -293,8 +335,10 @@ loop_refresh:
 	sw $t5, 0($t0)
 	addi $t0, $t0, 4
 	addi $t8, $t8, 1
-	beq $t8, 2048, main
+	beq $t8, 2048, end_refresh
 	j loop_refresh
+end_refresh:
+	jr $ra
 	
 collision_detection:
 	li $t0, 0x10008000
@@ -343,14 +387,23 @@ detected:
 	sw $t5, 8($t4)
 	
 	lw $t5, 12($t4)
-	addi $t5, $t5, -10
+	addi $t5, $t5, -5
 	sw $t5, 12($t4)
+	beq $t5, 0, game_over
 	
-	li $v0 1
-	move $a0 $t5
-	syscall
-	li $v0 4
-	la $a0 newline
-	syscall
-	
+	jr $ra
+
+draw_health:
+	li $t0, 0x10008000
+	addi $t0, $t0, 7508
+	la $t4, ship
+	lw $t4, 12($t4)
+	li $t5, 0x00FF00
+health_loop:
+	sw $t5, 0($t0)
+	addi $t4, $t4, -5
+	addi $t0, $t0, 4
+	beq $t4, 0, health_complete
+	j health_loop
+health_complete:
 	jr $ra
