@@ -39,7 +39,10 @@
 	c1:    .word    1, 0, 69
 	c2:    .word    1, 0, 69
 	c3:    .word    1, 0, 69
+	c4:    .word    1, 0, 69
+	c5:    .word    1, 0, 69
 	ship: .word  260, 0, 0, 100
+	gameData: .word 0, 4, -5
 	newline: .asciiz "\n"
 	special: .asciiz "hi!"
 	
@@ -59,11 +62,15 @@ main:
 	li $t0, 0x10008000 # $t0 stores the base address for display
 	addi $t6, $zero, 0
 obstacle_loop:
+	la $t5, gameData
+	lw $t5, 4($t5)
 	add $t6, $t6, 1
 	beq $t6, 1, obstacle1
 	beq $t6, 2, obstacle2
 	beq $t6, 3, obstacle3
-	beq $t6, 4, check_key
+	beq $t6, $t5, check_key
+	beq $t6, 4, obstacle4
+	beq $t6, 5, obstacle5
 obstacle1:
 	la $t4, c1
 	jal check_location
@@ -74,6 +81,14 @@ obstacle2:
 	j obstacle_check
 obstacle3:
 	la $t4, c3
+	jal check_location
+	j obstacle_check
+obstacle4:
+	la $t4, c4
+	jal check_location
+	j obstacle_check
+obstacle5:
+	la $t4, c5
 	jal check_location
 	j obstacle_check
 	
@@ -91,6 +106,7 @@ drawing:
 	jal draw_ship
 	jal collision_detection
 	jal draw_health
+	jal increment_difficulty
 	li $v0, 32
 	li $a0, 125
 	syscall
@@ -110,11 +126,10 @@ play_again:
 	li $v0, 10
 	syscall
 	
-
 	
-
 	
-
+	
+	
 check_location:
 	lw $t5, 0($t4)
 	li $t0, 0x10008000
@@ -129,6 +144,11 @@ exit_location_check:
 	jr $ra
 
 draw_obstacles:
+	la $t6, gameData
+	lw $t5, 0($t6)
+	addi $t5, $t5, 1
+	sw $t5, 0($t6)
+	
 	li $t0, 0x10008000 # $t0 stores the base address for display
 	li $a1, 28  #Here you set $a1 to the max bound.
     	li $v0, 42  #generates the random number.
@@ -266,6 +286,17 @@ respond_to_p:
 	jal clean_obstacles
 	la $t4, c3
 	jal clean_obstacles
+	la $t4, c4
+	jal clean_obstacles
+	la $t4, c5
+	jal clean_obstacles
+	
+	la $t4, gameData
+	sw $zero, 0($t4)
+	addi $t5, $zero, 4
+	sw $t5, 4($t4)
+	addi $t5, $zero, -5
+	sw $t5, 8($t4)
 	
 	j main
 	
@@ -387,8 +418,18 @@ detected:
 	addi $t5, $t5, 1
 	sw $t5, 8($t4)
 	
+	la $t6, gameData
+	lw $t6, 8($t6)
+	
+	li $v0 1
+	move $a0 $t6
+	syscall
+	li $v0 4
+	la $a0 newline
+	syscall
+	
 	lw $t5, 12($t4)
-	addi $t5, $t5, -50
+	add $t5, $t5, $t6
 	sw $t5, 12($t4)
 	beq $t5, 0, game_over
 	
@@ -407,6 +448,24 @@ health_loop:
 	beq $t4, 0, health_complete
 	j health_loop
 health_complete:
+	jr $ra
+
+increment_difficulty:
+	la $t5, gameData
+	lw $t6, 0($t5)
+	beq $t6, 9, increment
+	beq $t6, 15, increment
+	beq $t6, 20, increment_damage
+	j end_increment
+increment:
+	lw $t6, 4($t5)
+	addi $t6, $t6, 1
+	sw $t6, 4($t5)
+	j end_increment
+increment_damage:
+	addi $t6, $zero, -10
+	sw $t6, 8($t5)
+end_increment:
 	jr $ra
 
 draw_end:
