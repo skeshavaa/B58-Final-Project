@@ -98,6 +98,7 @@ drawing:
 	j main
 game_over:
 	jal refresh
+	jal draw_end
 play_again:
 	li $t9, 0xffff0000 
 	lw $t9, 0($t9)
@@ -387,7 +388,7 @@ detected:
 	sw $t5, 8($t4)
 	
 	lw $t5, 12($t4)
-	addi $t5, $t5, -5
+	addi $t5, $t5, -50
 	sw $t5, 12($t4)
 	beq $t5, 0, game_over
 	
@@ -407,3 +408,118 @@ health_loop:
 	j health_loop
 health_complete:
 	jr $ra
+
+draw_end:
+	li $t0, 0x10008000
+	addi $t0, $t0, 80
+	addi $t0, $t0, 512
+	
+	sw $t2, 4($t0)
+	sw $t2, 8($t0)
+	sw $t2, 12($t0)
+	sw $t2, 256($t0)
+	sw $t2, 512($t0)
+	sw $t2, 768($t0)
+	sw $t2, 1028($t0)
+	sw $t2, 1032($t0)
+	sw $t2, 1036($t0)
+	sw $t2, 780($t0)
+	sw $t2, 524($t0)
+	sw $t2, 520($t0)
+	
+	sw $t2, 28($t0)
+	sw $t2, 32($t0)
+	sw $t2, 280($t0)
+	sw $t2, 292($t0)
+	sw $t2, 536($t0)
+	sw $t2, 540($t0)
+	sw $t2, 544($t0)
+	sw $t2, 548($t0)
+	sw $t2, 792($t0)
+	sw $t2, 804($t0)
+	sw $t2, 1048($t0)
+	sw $t2, 1060($t0)
+	
+	sw $t2, 48($t0)
+	sw $t2, 64($t0)
+	sw $t2, 304($t0)
+	sw $t2, 308($t0)
+	sw $t2, 316($t0)
+	sw $t2, 320($t0)
+	sw $t2, 560($t0)
+	sw $t2, 568($t0)
+	sw $t2, 576($t0)
+	sw $t2, 816($t0)
+	sw $t2, 832($t0)
+	sw $t2, 1072($t0)
+	sw $t2, 1088($t0)
+	
+	sw $t2, 76($t0)
+	sw $t2, 80($t0)
+	sw $t2, 84($t0)
+	sw $t2, 88($t0)
+	sw $t2, 332($t0)
+	sw $t2, 588($t0)
+	sw $t2, 592($t0)
+	sw $t2, 596($t0)
+	sw $t2, 844($t0)
+	sw $t2, 1100($t0)
+	sw $t2, 1104($t0)
+	sw $t2, 1108($t0)
+	sw $t2, 1112($t0)
+	
+	sw $t2, 1540($t0)
+	sw $t2, 1544($t0)
+	sw $t2, 1792($t0)
+	sw $t2, 1804($t0)
+	sw $t2, 2048($t0)
+	sw $t2, 2060($t0)
+	sw $t2, 2304($t0)
+	sw $t2, 2316($t0)
+	sw $t2, 2564($t0)
+	sw $t2, 2568($t0)
+	
+	sw $t2, 1560($t0)
+	sw $t2, 1572($t0)
+	sw $t2, 1816($t0)
+	sw $t2, 1828($t0)
+	sw $t2, 2072($t0)
+	sw $t2, 2084($t0)
+	sw $t2, 2332($t0)
+	sw $t2, 2336($t0)
+	sw $t2, 2588($t0)
+	sw $t2, 2592($t0)
+	
+	sw $t2, 1584($t0)
+	sw $t2, 1588($t0)
+	sw $t2, 1592($t0)
+	sw $t2, 1596($t0)
+	sw $t2, 1600($t0)
+	sw $t2, 1840($t0)
+	sw $t2, 2096($t0)
+	sw $t2, 2100($t0)
+	sw $t2, 2104($t0)
+	sw $t2, 2108($t0)
+	sw $t2, 2352($t0)
+	sw $t2, 2608($t0)
+	sw $t2, 2612($t0)
+	sw $t2, 2616($t0)
+	sw $t2, 2620($t0)
+	sw $t2, 2624($t0)
+	
+	sw $t2, 1612($t0)
+	sw $t2, 1616($t0)
+	sw $t2, 1620($t0)
+	sw $t2, 1868($t0)
+	sw $t2, 1880($t0)
+	sw $t2, 2124($t0)
+	sw $t2, 2128($t0)
+	sw $t2, 2132($t0)
+	sw $t2, 2136($t0)
+	sw $t2, 2380($t0)
+	sw $t2, 2388($t0)
+	sw $t2, 2636($t0)
+	sw $t2, 2648($t0)
+	
+	jr $ra
+	
