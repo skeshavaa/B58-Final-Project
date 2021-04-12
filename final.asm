@@ -113,7 +113,7 @@ drawing:
 	jal refresh
 	j main
 game_over:
-	jal refresh
+	jal clear_all
 	jal draw_end
 play_again:
 	li $t9, 0xffff0000 
@@ -297,7 +297,7 @@ respond_to_p:
 	sw $t5, 4($t4)
 	addi $t5, $zero, -5
 	sw $t5, 8($t4)
-	
+	jal clear_all
 	j main
 	
 clean_obstacles:
@@ -359,7 +359,7 @@ damaged:
 finish_drawing:
 	jr $ra
 
-refresh:
+clear_all:
 	li $t5, 0x000000
 	li $t0, 0x10008000
 	addi $t8, $zero, 0
@@ -367,10 +367,77 @@ loop_refresh:
 	sw $t5, 0($t0)
 	addi $t0, $t0, 4
 	addi $t8, $t8, 1
-	beq $t8, 2048, end_refresh
+	beq $t8, 2048, end_clear
 	j loop_refresh
+end_clear:
+	jr $ra
+
+refresh:
+	li $t5, 0x000000
+	li $t0, 0x10008000
+	la $t6, ship
+	lw $t6, 0($t6)
+	
+	add $t0, $t0, $t6
+	sw $t5, 0($t0)
+	sw $t5, 4($t0)
+	addi $t0, $t0, -260
+	
+	sw $t5, 520($t0)
+	sw $t5, 524($t0)
+	
+	sw $t5, 776($t0)
+	sw $t5, 780($t0)
+	sw $t5, 784($t0)
+	sw $t5, 788($t0)
+	
+	sw $t5, 1032($t0)
+	sw $t5, 1036($t0)
+	
+	sw $t5, 1284($t0)
+	sw $t5, 1288($t0)
+	
+	
+	addi $t4, $zero, 1
+obstacle_refresh_loop:
+	la $t6, c1
+	beq $t4, 1, obstacle_refresh
+	la $t6, c2
+	beq $t4, 2, obstacle_refresh
+	la $t6, c3
+	beq $t4, 3, obstacle_refresh
+	la $t6, c4
+	beq $t4, 4, obstacle_refresh
+	la $t6, c5
+	beq $t4, 5, obstacle_refresh
+	j health_refresh
+obstacle_refresh:
+	li $t0, 0x10008000
+	lw $t6, 0($t6)
+	blt $t6, 0x10008000, health_refresh
+	add $t0, $zero, $t6
+	sw $t5, -4($t0)
+	sw $t5, 0($t0)
+	sw $t5, 256($t0)
+	sw $t5, -256($t0)
+	addi $t4, $t4, 1
+	j obstacle_refresh_loop
+
+health_refresh:
+	li $t0, 0x10008000
+	addi $t0, $t0, 7508
+	la $t4, ship
+	lw $t4, 12($t4)
+health_refresh_loop:
+	sw $t5, 0($t0)
+	addi $t4, $t4, -5
+	addi $t0, $t0, 4
+	beq $t4, 0, end_refresh
+	j health_refresh_loop
+
 end_refresh:
 	jr $ra
+	
 	
 collision_detection:
 	li $t0, 0x10008000
