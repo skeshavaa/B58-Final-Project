@@ -14,23 +14,22 @@
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestones 1 and 2, partially 3
+# - Milestons 1,2,3 and 2.5/3 of milestone 4
 #
 # Which approved features have been implemented for milestone 4?
 # (See the assignment handout for the list of additional features)
-# 1. (fill in the feature, if any)
-# 2. (fill in the feature, if any)
-# 3. (fill in the feature, if any)
-# ... (add more if necessary)
+# 1. Smooth Graphics
+# 2. Increased Difficulty
+# 3. Attempted to keep trakc of score
 #
 # Link to video demonstration for final submission:
-# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+# - https://www.youtube.com/watch?v=vAAl8NhGgJk&ab_channel=KeshavaaShaiskandan
 #
 # Are you OK with us sharing the video with people outside course staff?
 # - Yes
 #
 # Any additional information that the TA needs to know:
-# - (write here, if any)
+# - Hope you liked it!
 #
 #####################################################################
 
@@ -498,7 +497,7 @@ detected:
 	lw $t5, 12($t4)
 	add $t5, $t5, $t6
 	sw $t5, 12($t4)
-	beq $t5, 0, game_over
+	ble $t5, 0, game_over
 	
 	jr $ra
 
